@@ -10,7 +10,7 @@
 	"DocsURL": "https://developer.oculus.com/documentation/unreal/latest/concepts/unreal-engine/",
 	"MarketplaceURL": "",
 	"SupportURL": "",
-	"EngineVersion": "5.3.0",
+	"EngineVersion": "",
 	"CanContainContent": true,
 	"Installed": true,
 	"SupportedTargetPlatforms": [
