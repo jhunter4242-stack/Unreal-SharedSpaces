@@ -7,11 +7,7 @@
 		{
 			"Name": "SharedSpaces",
 			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"AdditionalDependencies": [
-				"Engine",
-				"UMG"
-			]
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
@@ -33,12 +29,28 @@
 			"Enabled": false
 		},
 		{
+			"Name": "XRBase",
+			"Enabled": true
+		},
+		{
 			"Name": "OculusPlatform",
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
 				"Win64",
 				"Android"
 			]
+		},
+		{
+			"Name": "OnlineSubsystemEOS",
+			"Enabled": true
+		},
+		{
+			"Name": "EOSShared",
+			"Enabled": true
+		},
+		{
+			"Name": "SocketSubsystemEOS",
+			"Enabled": true
 		}
 	]
 }

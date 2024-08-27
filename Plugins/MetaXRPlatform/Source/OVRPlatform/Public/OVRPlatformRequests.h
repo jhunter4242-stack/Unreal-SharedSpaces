@@ -544,6 +544,95 @@ public:
         FString& ErrorMsg);
 
     // ----------------------------------------------------------------------
+    // Cowatching
+
+    /** Presenter data is used to drive a cowatching session. This can be called when there is an active cowatching session. */
+    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|Cowatching")
+    static void Cowatching_GetPresenterData(
+        UObject* WorldContextObject,
+        EOvrRequestOutputPins& OutExecs,
+        FLatentActionInfo LatentInfo,
+        FString& StringPayload,
+        FString& ErrorMsg);
+
+    /**  Get the viewer data of everyone who is in a cowatching session whose data was set by Cowatching_SetViewerData(). This can be called when there is an active cowatching session. */
+    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|Cowatching")
+    static void Cowatching_GetViewersData(
+        UObject* WorldContextObject,
+        EOvrRequestOutputPins& OutExecs,
+        FLatentActionInfo LatentInfo,
+        FOvrCowatchViewerPages& CowatchViewerPages,
+        FString& ErrorMsg);
+
+    /** Check whether the current user is in the current cowatching session. */
+    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|Cowatching")
+    static void Cowatching_IsInSession(
+        UObject* WorldContextObject,
+        EOvrRequestOutputPins& OutExecs,
+        FLatentActionInfo LatentInfo,
+        FOvrCowatchingState& CowatchingState,
+        FString& ErrorMsg);
+
+    /** Join the current cowatching session. Viewer data can only be updated by users who are in the session. */
+    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|Cowatching")
+    static void Cowatching_JoinSession(
+        UObject* WorldContextObject,
+        EOvrRequestOutputPins& OutExecs,
+        FLatentActionInfo LatentInfo,
+        FString& ErrorMsg);
+
+    /**  Launch a dialog for inviting users to cowatch in Copresent Home. */
+    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|Cowatching")
+    static void Cowatching_LaunchInviteDialog(
+        UObject* WorldContextObject,
+        EOvrRequestOutputPins& OutExecs,
+        FLatentActionInfo LatentInfo,
+        FString& ErrorMsg);
+
+    /** Leave the current cowatching session. Viewer data will no longer be relevant. */
+    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|Cowatching")
+    static void Cowatching_LeaveSession(
+        UObject* WorldContextObject,
+        EOvrRequestOutputPins& OutExecs,
+        FLatentActionInfo LatentInfo,
+        FString& ErrorMsg);
+
+    /** Request to start a cowatching session as the presenter while copresent in home. */
+    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|Cowatching")
+    static void Cowatching_RequestToPresent(
+        UObject* WorldContextObject,
+        EOvrRequestOutputPins& OutExecs,
+        FLatentActionInfo LatentInfo,
+        FString& ErrorMsg);
+
+    /** Stop being the presenter. This will end the cowatching session. */
+    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|Cowatching")
+    static void Cowatching_ResignFromPresenting(
+        UObject* WorldContextObject,
+        EOvrRequestOutputPins& OutExecs,
+        FLatentActionInfo LatentInfo,
+        FString& ErrorMsg);
+
+    /** Set the data that drives a cowatching session. This method is only callable by the presenter. Video title cannot exceed 100 characters, and data size is limited to 500 characters. The data will be eventually consistent across all users. */
+    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|Cowatching")
+    static void Cowatching_SetPresenterData(
+        UObject* WorldContextObject,
+        EOvrRequestOutputPins& OutExecs,
+        FLatentActionInfo LatentInfo,
+        FString VideoTitle,
+        FString PresenterData,
+        FString& ErrorMsg);
+
+    /** Set the current user's viewer data to be shared with copresent users. This can be called when there is an active cowatching session. Data size is limited to 500 characters. The data will be eventually consistent across all users. */
+    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|Cowatching")
+    static void Cowatching_SetViewerData(
+        UObject* WorldContextObject,
+        EOvrRequestOutputPins& OutExecs,
+        FLatentActionInfo LatentInfo,
+        FString ViewerData,
+        FString& ErrorMsg);
+
+    // ----------------------------------------------------------------------
     // DeviceApplicationIntegrity
 
     /**
@@ -1187,129 +1276,6 @@ public:
         EOvrRequestOutputPins& OutExecs,
         FLatentActionInfo LatentInfo,
         EOvrAppAgeCategory AgeCategory,
-        FString& ErrorMsg);
-
-    // ----------------------------------------------------------------------
-    // UserDataStore
-
-    /**
-     * Delete an entry by a key from a private user data store.
-     * @param UserID - The ID of the user who owns this private user data store.
-     * @param Key - The key of entry.
-     */
-    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|UserDataStore")
-    static void UserDataStore_PrivateDeleteEntryByKey(
-        UObject* WorldContextObject,
-        EOvrRequestOutputPins& OutExecs,
-        FLatentActionInfo LatentInfo,
-        FOvrId UserID,
-        FString Key,
-        FOvrUserDataStoreUpdateResponse& UserDataStoreUpdateResponse,
-        FString& ErrorMsg);
-
-    /**
-     * Get entries from a private user data store.
-     * @param UserID - The ID of the user who owns this private user data store.
-     */
-    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|UserDataStore")
-    static void UserDataStore_PrivateGetEntries(
-        UObject* WorldContextObject,
-        EOvrRequestOutputPins& OutExecs,
-        FLatentActionInfo LatentInfo,
-        FOvrId UserID,
-        TMap<FString, FString>& DataStore,
-        FString& ErrorMsg);
-
-    /**
-     * Get an entry by a key from a private user data store.
-     * @param UserID - The ID of the user who owns this private user data store.
-     * @param Key - The key of entry.
-     */
-    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|UserDataStore")
-    static void UserDataStore_PrivateGetEntryByKey(
-        UObject* WorldContextObject,
-        EOvrRequestOutputPins& OutExecs,
-        FLatentActionInfo LatentInfo,
-        FOvrId UserID,
-        FString Key,
-        TMap<FString, FString>& DataStore,
-        FString& ErrorMsg);
-
-    /**
-     * Write a single entry to a private user data store.
-     * @param UserID - The ID of the user who owns this private user data store.
-     * @param Key - The key of entry.
-     * @param Value - The value of entry.
-     */
-    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|UserDataStore")
-    static void UserDataStore_PrivateWriteEntry(
-        UObject* WorldContextObject,
-        EOvrRequestOutputPins& OutExecs,
-        FLatentActionInfo LatentInfo,
-        FOvrId UserID,
-        FString Key,
-        FString Value,
-        FOvrUserDataStoreUpdateResponse& UserDataStoreUpdateResponse,
-        FString& ErrorMsg);
-
-    /**
-     * Delete an entry by a key from a public user data store.
-     * @param UserID - The ID of the user who owns this public user data store.
-     * @param Key - The key of entry.
-     */
-    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|UserDataStore")
-    static void UserDataStore_PublicDeleteEntryByKey(
-        UObject* WorldContextObject,
-        EOvrRequestOutputPins& OutExecs,
-        FLatentActionInfo LatentInfo,
-        FOvrId UserID,
-        FString Key,
-        FOvrUserDataStoreUpdateResponse& UserDataStoreUpdateResponse,
-        FString& ErrorMsg);
-
-    /**
-     * Get entries from a public user data store.
-     * @param UserID - The ID of the user who owns this public user data store.
-     */
-    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|UserDataStore")
-    static void UserDataStore_PublicGetEntries(
-        UObject* WorldContextObject,
-        EOvrRequestOutputPins& OutExecs,
-        FLatentActionInfo LatentInfo,
-        FOvrId UserID,
-        TMap<FString, FString>& DataStore,
-        FString& ErrorMsg);
-
-    /**
-     * Get an entry by a key from a public user data store.
-     * @param UserID - The ID of the user who owns this public user data store.
-     * @param Key - The key of entry.
-     */
-    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|UserDataStore")
-    static void UserDataStore_PublicGetEntryByKey(
-        UObject* WorldContextObject,
-        EOvrRequestOutputPins& OutExecs,
-        FLatentActionInfo LatentInfo,
-        FOvrId UserID,
-        FString Key,
-        TMap<FString, FString>& DataStore,
-        FString& ErrorMsg);
-
-    /**
-     * Write a single entry to a public user data store.
-     * @param UserID - The ID of the user who owns this public user data store.
-     * @param Key - The key of entry.
-     * @param Value - The value of entry.
-     */
-    UFUNCTION(BlueprintCallable, meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "OutExecs"), Category = "OvrPlatform|UserDataStore")
-    static void UserDataStore_PublicWriteEntry(
-        UObject* WorldContextObject,
-        EOvrRequestOutputPins& OutExecs,
-        FLatentActionInfo LatentInfo,
-        FOvrId UserID,
-        FString Key,
-        FString Value,
-        FOvrUserDataStoreUpdateResponse& UserDataStoreUpdateResponse,
         FString& ErrorMsg);
 
     // ----------------------------------------------------------------------

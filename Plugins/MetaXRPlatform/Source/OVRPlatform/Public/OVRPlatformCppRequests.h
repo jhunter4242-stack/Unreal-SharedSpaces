@@ -500,6 +500,85 @@ void OvrPlatform_Challenges_UpdateInfo(
     OvrPlatform_Challenges_UpdateInfo_Delegate&& Delegate);
 
 // ----------------------------------------------------------------------
+// Cowatching
+
+/** Presenter data is used to drive a cowatching session. This can be called when there is an active cowatching session. */
+typedef TSharedPtr<FString> FStringPtr;
+DECLARE_DELEGATE_ThreeParams(OvrPlatform_Cowatching_GetPresenterData_Delegate, bool, FStringPtr, FString);
+
+void OvrPlatform_Cowatching_GetPresenterData(
+    UGameInstance* GameInstance,
+    OvrPlatform_Cowatching_GetPresenterData_Delegate&& Delegate);
+
+/**  Get the viewer data of everyone who is in a cowatching session whose data was set by Cowatching_SetViewerData(). This can be called when there is an active cowatching session. */
+typedef TSharedPtr<FOvrCowatchViewerPages> FOvrCowatchViewerArrayPtr;
+DECLARE_DELEGATE_ThreeParams(OvrPlatform_Cowatching_GetViewersData_Delegate, bool, FOvrCowatchViewerArrayPtr, FString);
+
+void OvrPlatform_Cowatching_GetViewersData(
+    UGameInstance* GameInstance,
+    OvrPlatform_Cowatching_GetViewersData_Delegate&& Delegate);
+
+/** Check whether the current user is in the current cowatching session. */
+typedef TSharedPtr<FOvrCowatchingState> FOvrCowatchingStatePtr;
+DECLARE_DELEGATE_ThreeParams(OvrPlatform_Cowatching_IsInSession_Delegate, bool, FOvrCowatchingStatePtr, FString);
+
+void OvrPlatform_Cowatching_IsInSession(
+    UGameInstance* GameInstance,
+    OvrPlatform_Cowatching_IsInSession_Delegate&& Delegate);
+
+/** Join the current cowatching session. Viewer data can only be updated by users who are in the session. */
+DECLARE_DELEGATE_TwoParams(OvrPlatform_Cowatching_JoinSession_Delegate, bool, FString);
+
+void OvrPlatform_Cowatching_JoinSession(
+    UGameInstance* GameInstance,
+    OvrPlatform_Cowatching_JoinSession_Delegate&& Delegate);
+
+/**  Launch a dialog for inviting users to cowatch in Copresent Home. */
+DECLARE_DELEGATE_TwoParams(OvrPlatform_Cowatching_LaunchInviteDialog_Delegate, bool, FString);
+
+void OvrPlatform_Cowatching_LaunchInviteDialog(
+    UGameInstance* GameInstance,
+    OvrPlatform_Cowatching_LaunchInviteDialog_Delegate&& Delegate);
+
+/** Leave the current cowatching session. Viewer data will no longer be relevant. */
+DECLARE_DELEGATE_TwoParams(OvrPlatform_Cowatching_LeaveSession_Delegate, bool, FString);
+
+void OvrPlatform_Cowatching_LeaveSession(
+    UGameInstance* GameInstance,
+    OvrPlatform_Cowatching_LeaveSession_Delegate&& Delegate);
+
+/** Request to start a cowatching session as the presenter while copresent in home. */
+DECLARE_DELEGATE_TwoParams(OvrPlatform_Cowatching_RequestToPresent_Delegate, bool, FString);
+
+void OvrPlatform_Cowatching_RequestToPresent(
+    UGameInstance* GameInstance,
+    OvrPlatform_Cowatching_RequestToPresent_Delegate&& Delegate);
+
+/** Stop being the presenter. This will end the cowatching session. */
+DECLARE_DELEGATE_TwoParams(OvrPlatform_Cowatching_ResignFromPresenting_Delegate, bool, FString);
+
+void OvrPlatform_Cowatching_ResignFromPresenting(
+    UGameInstance* GameInstance,
+    OvrPlatform_Cowatching_ResignFromPresenting_Delegate&& Delegate);
+
+/** Set the data that drives a cowatching session. This method is only callable by the presenter. Video title cannot exceed 100 characters, and data size is limited to 500 characters. The data will be eventually consistent across all users. */
+DECLARE_DELEGATE_TwoParams(OvrPlatform_Cowatching_SetPresenterData_Delegate, bool, FString);
+
+void OvrPlatform_Cowatching_SetPresenterData(
+    UGameInstance* GameInstance,
+    FString VideoTitle,
+    FString PresenterData,
+    OvrPlatform_Cowatching_SetPresenterData_Delegate&& Delegate);
+
+/** Set the current user's viewer data to be shared with copresent users. This can be called when there is an active cowatching session. Data size is limited to 500 characters. The data will be eventually consistent across all users. */
+DECLARE_DELEGATE_TwoParams(OvrPlatform_Cowatching_SetViewerData_Delegate, bool, FString);
+
+void OvrPlatform_Cowatching_SetViewerData(
+    UGameInstance* GameInstance,
+    FString ViewerData,
+    OvrPlatform_Cowatching_SetViewerData_Delegate&& Delegate);
+
+// ----------------------------------------------------------------------
 // DeviceApplicationIntegrity
 
 /**
@@ -1098,121 +1177,6 @@ void OvrPlatform_UserAgeCategory_Report(
     UGameInstance* GameInstance,
     EOvrAppAgeCategory AgeCategory,
     OvrPlatform_UserAgeCategory_Report_Delegate&& Delegate);
-
-// ----------------------------------------------------------------------
-// UserDataStore
-
-/**
- * Delete an entry by a key from a private user data store.
- * @param UserID - The ID of the user who owns this private user data store.
- * @param Key - The key of entry.
- */
-typedef TSharedPtr<FOvrUserDataStoreUpdateResponse> FOvrUserDataStoreUpdateResponsePtr;
-DECLARE_DELEGATE_ThreeParams(OvrPlatform_UserDataStore_PrivateDeleteEntryByKey_Delegate, bool, FOvrUserDataStoreUpdateResponsePtr, FString);
-
-void OvrPlatform_UserDataStore_PrivateDeleteEntryByKey(
-    UGameInstance* GameInstance,
-    FOvrId UserID,
-    FString Key,
-    OvrPlatform_UserDataStore_PrivateDeleteEntryByKey_Delegate&& Delegate);
-
-/**
- * Get entries from a private user data store.
- * @param UserID - The ID of the user who owns this private user data store.
- */
-typedef TSharedPtr<TMap<FString, FString>> FOvrDataStorePtr;
-DECLARE_DELEGATE_ThreeParams(OvrPlatform_UserDataStore_PrivateGetEntries_Delegate, bool, FOvrDataStorePtr, FString);
-
-void OvrPlatform_UserDataStore_PrivateGetEntries(
-    UGameInstance* GameInstance,
-    FOvrId UserID,
-    OvrPlatform_UserDataStore_PrivateGetEntries_Delegate&& Delegate);
-
-/**
- * Get an entry by a key from a private user data store.
- * @param UserID - The ID of the user who owns this private user data store.
- * @param Key - The key of entry.
- */
-typedef TSharedPtr<TMap<FString, FString>> FOvrDataStorePtr;
-DECLARE_DELEGATE_ThreeParams(OvrPlatform_UserDataStore_PrivateGetEntryByKey_Delegate, bool, FOvrDataStorePtr, FString);
-
-void OvrPlatform_UserDataStore_PrivateGetEntryByKey(
-    UGameInstance* GameInstance,
-    FOvrId UserID,
-    FString Key,
-    OvrPlatform_UserDataStore_PrivateGetEntryByKey_Delegate&& Delegate);
-
-/**
- * Write a single entry to a private user data store.
- * @param UserID - The ID of the user who owns this private user data store.
- * @param Key - The key of entry.
- * @param Value - The value of entry.
- */
-typedef TSharedPtr<FOvrUserDataStoreUpdateResponse> FOvrUserDataStoreUpdateResponsePtr;
-DECLARE_DELEGATE_ThreeParams(OvrPlatform_UserDataStore_PrivateWriteEntry_Delegate, bool, FOvrUserDataStoreUpdateResponsePtr, FString);
-
-void OvrPlatform_UserDataStore_PrivateWriteEntry(
-    UGameInstance* GameInstance,
-    FOvrId UserID,
-    FString Key,
-    FString Value,
-    OvrPlatform_UserDataStore_PrivateWriteEntry_Delegate&& Delegate);
-
-/**
- * Delete an entry by a key from a public user data store.
- * @param UserID - The ID of the user who owns this public user data store.
- * @param Key - The key of entry.
- */
-typedef TSharedPtr<FOvrUserDataStoreUpdateResponse> FOvrUserDataStoreUpdateResponsePtr;
-DECLARE_DELEGATE_ThreeParams(OvrPlatform_UserDataStore_PublicDeleteEntryByKey_Delegate, bool, FOvrUserDataStoreUpdateResponsePtr, FString);
-
-void OvrPlatform_UserDataStore_PublicDeleteEntryByKey(
-    UGameInstance* GameInstance,
-    FOvrId UserID,
-    FString Key,
-    OvrPlatform_UserDataStore_PublicDeleteEntryByKey_Delegate&& Delegate);
-
-/**
- * Get entries from a public user data store.
- * @param UserID - The ID of the user who owns this public user data store.
- */
-typedef TSharedPtr<TMap<FString, FString>> FOvrDataStorePtr;
-DECLARE_DELEGATE_ThreeParams(OvrPlatform_UserDataStore_PublicGetEntries_Delegate, bool, FOvrDataStorePtr, FString);
-
-void OvrPlatform_UserDataStore_PublicGetEntries(
-    UGameInstance* GameInstance,
-    FOvrId UserID,
-    OvrPlatform_UserDataStore_PublicGetEntries_Delegate&& Delegate);
-
-/**
- * Get an entry by a key from a public user data store.
- * @param UserID - The ID of the user who owns this public user data store.
- * @param Key - The key of entry.
- */
-typedef TSharedPtr<TMap<FString, FString>> FOvrDataStorePtr;
-DECLARE_DELEGATE_ThreeParams(OvrPlatform_UserDataStore_PublicGetEntryByKey_Delegate, bool, FOvrDataStorePtr, FString);
-
-void OvrPlatform_UserDataStore_PublicGetEntryByKey(
-    UGameInstance* GameInstance,
-    FOvrId UserID,
-    FString Key,
-    OvrPlatform_UserDataStore_PublicGetEntryByKey_Delegate&& Delegate);
-
-/**
- * Write a single entry to a public user data store.
- * @param UserID - The ID of the user who owns this public user data store.
- * @param Key - The key of entry.
- * @param Value - The value of entry.
- */
-typedef TSharedPtr<FOvrUserDataStoreUpdateResponse> FOvrUserDataStoreUpdateResponsePtr;
-DECLARE_DELEGATE_ThreeParams(OvrPlatform_UserDataStore_PublicWriteEntry_Delegate, bool, FOvrUserDataStoreUpdateResponsePtr, FString);
-
-void OvrPlatform_UserDataStore_PublicWriteEntry(
-    UGameInstance* GameInstance,
-    FOvrId UserID,
-    FString Key,
-    FString Value,
-    OvrPlatform_UserDataStore_PublicWriteEntry_Delegate&& Delegate);
 
 // ----------------------------------------------------------------------
 // Voip

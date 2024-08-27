@@ -19,6 +19,14 @@ class SHAREDSPACES_API USharedSpacesFunctionLibrary : public UBlueprintFunctionL
 public:
 
 	/**
+	 * Utility to add quotation marks to the supplied deeplink so that the JSCON reader can parse it correctly.
+	 * @param DeepLink - Deeplink to parse.
+	 * @return A string.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SharedSpaces|LaunchDeeplink")
+	static FString AddQuotationMarks(const FString& DeepLink);
+
+	/**
 	 * Utility to retrieve whether IsLobby is true in the supplied deeplink.
 	 * @param DeepLink - Deeplink to parse.
 	 * @param bisLobby - Boolean with the result.

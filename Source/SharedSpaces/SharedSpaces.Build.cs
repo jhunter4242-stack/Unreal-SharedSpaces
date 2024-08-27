@@ -10,6 +10,7 @@ public class SharedSpaces : ModuleRules
 	public SharedSpaces(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		MinFilesUsingPrecompiledHeaderOverride = 1;
 
 		PublicDependencyModuleNames.AddRange(
 			new string[] {
@@ -21,8 +22,9 @@ public class SharedSpaces : ModuleRules
 				"HeadMountedDisplay",
 				"UMG",
 				"OnlineSubsystem",
-				"OnlineSubsystemNull",
+				"OnlineSubsystemEOS",
 				"OnlineSubsystemUtils",
+				"OVRPlatform",
 			});
 
 		PrivateDependencyModuleNames.AddRange(
@@ -32,11 +34,15 @@ public class SharedSpaces : ModuleRules
 				"OculusUtils",
 				"XRBase",
 				"EnhancedInput",
+				"OnlineSubsystem",
+				"OnlineSubsystemEOS",
+				"OnlineSubsystemUtils",
 			});
 
-		if (Target.Platform == UnrealTargetPlatform.Android && Target.Configuration == UnrealTargetConfiguration.Shipping) {
+		if (Target.Platform == UnrealTargetPlatform.Android && Target.Configuration == UnrealTargetConfiguration.Shipping)
+		{
 			var manifestFile = Path.Combine(ModuleDirectory, "AndroidSanitizePermissions_UPL.xml");
 			AdditionalPropertiesForReceipt.Add("AndroidPlugin", manifestFile);
-        }
+		}
 	}
 }

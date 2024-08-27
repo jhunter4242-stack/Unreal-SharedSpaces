@@ -17,7 +17,7 @@ D. <a href="#D">Oculus Application Configuration</a><br/>
 &nbsp;&nbsp;&nbsp;1. <a href="#D1">Application Identifier</a><br/>
 &nbsp;&nbsp;&nbsp;2. <a href="#D2">Destinations</a><br/>
 &nbsp;&nbsp;&nbsp;3. <a href="#D3">Data Use Checkup</a><br/>
-&nbsp;&nbsp;&nbsp;4. <a href="#D4">Photon Configuration</a><br/>
+&nbsp;&nbsp;&nbsp;4. <a href="#D4">EOS Configuration</a><br/>
 </td>
 </tr>
 </table>
@@ -26,7 +26,7 @@ D. <a href="#D">Oculus Application Configuration</a><br/>
 
 # A. <a id="A">Overview of SharedSpaces</a>
 SharedSpaces was built by the VR Developer Tools team to demonstrate how you can quickly get people together
-in VR using the Oculus Social Platform APIs.  This version was built for the Unreal Engine using the Photon SDK as
+in VR using the Oculus Social Platform APIs.  This version was built for the Unreal Engine using the Unreal EOS plugin as
 the transport layer.  Other versions are available, in particular one built for the Unity game engine.
 
 <div style="margin: auto; width: 60%; padding: 10pt;">
@@ -36,7 +36,7 @@ the transport layer.  Other versions are available, in particular one built for 
 	<td style="border:0px;">Group presence with <i>destination</i>, <i>lobby</i> and <i>match</i> ids.</td>
 </tr>
 <tr style="background-color:#EEFFEE;">
-	<td style="border:0px;"><b>Photon</b></td>
+	<td style="border:0px;"><b>EOS</b></td>
 	<td style="border:0px;">Transport via a <i>room</i> named after the <i>lobby</i> or <i>match</i> id.</td>
 </tr>
 <tr style="background-color:#EEEEFF;">
@@ -47,7 +47,7 @@ the transport layer.  Other versions are available, in particular one built for 
 </div>
 
 SharedSpaces networking is divided into three layers.  The Oculus layer provides presence information needed
-to find and connect with friends.  The Photon layer provides the transport layer for sending messages to other
+to find and connect with friends.  The EOS layer provides the transport layer for sending messages to other
 players.  And the UE4 layer handles the replication of game objects.
 
 In this overview we will explore each of these layers and show how we connected them together to make a
@@ -109,27 +109,27 @@ Again, anybody is free to go from their lobby to the purple room at any time, an
 their match session id.  It is a space where you can meet people from outside your group without a prior
 invitation.
 
-## *Transport Layer - Photon Rooms*
+## *Transport Layer - EOS Lobbies*
 
-To connect users, Photon has the concept of room.  People in the same match or lobby instance will be in the same 
-Photon room in order for data to flow between them.  The transport layer is responsible for routing packets
+To connect users, EOS has the concept of lobby.  People in the same match or lobby instance will be in the same 
+EOS lobby in order for data to flow between them. The transport layer is responsible for routing packets
 between your users who are most likely behind network firewalls.
 
 <div style="text-align: center; padding: 10pt;"><img src="./Media/session_to_room.png" align="middle" width="650"></div>
 
-Photon rooms have *unique names*.  The name of the room that we will use comes directly from the social layer:
+EOS lobbies have *unique names*.  The name of the room that we will use comes directly from the social layer:
 we either use your match session id, if you have one, or your lobby session id, otherwise.
 
-A key feature of the Photon room system is that it keeps track of the oldest member in the room, called
+A key feature of the EOS lobby system is that it keeps track of the oldest member in the room, called
 the “master client”, here identified with stars.
 
-<div style="text-align: center; padding: 10pt;"><img src="./Media/photon_join_or_create.png" align="middle" width="650"></div>
+<div style="text-align: center; padding: 10pt;"><img src="./Media/eos_join_or_create.png" align="middle" width="650"></div>
 
 Let’s look at Alice, Bob and Charlie entering the Purple room.  Charlie is first to join, so the room is
 created for him and he is marked as its **master client**.  Alice and Bob join shortly after and they are
 added as **normal clients**.
 
-<div style="text-align: center; padding: 10pt;"><img src="./Media/photon_notification.png" align="middle" width="650"></div>
+<div style="text-align: center; padding: 10pt;"><img src="./Media/eos_notification.png" align="middle" width="650"></div>
 
 If Charlie, as the master client, leaves the room, a new master client is selected and all remaining clients
 are notified of that change.  This is a key feature for the next networking layer.
@@ -153,20 +153,20 @@ will accept connections from the other players.
 <div style="text-align: center; padding: 10pt;"><img src="./Media/ue4_open.png" align="middle" width="650"></div>
 
 So for each room, we need to select one of the users to be the UE4 listen-server.  This decision comes from
-the transport layer: the **master client** of the corresponding Photon room will be our host.  In UE4 terms,
+the transport layer: the **master client** of the corresponding EOS room will be our host.  In UE4 terms,
 the host opens a map with the ‘listen’ option while the clients connect to the master client using an address
-that is understood by our Photon Net Driver.
+that is understood by our EOS Net Driver.
 
 
-<div style="text-align: center; padding: 10pt;"><img src="./Media/photon_to_ue4_1.png" align="middle" width="650"></div>
+<div style="text-align: center; padding: 10pt;"><img src="./Media/EOS_to_ue4_1.png" align="middle" width="650"></div>
 
 When the player hosting leaves, we perform a host migration.  Here we can see that Alice is leaving the purple
-room.  Photon picks Bob as the new master client. The remaining members of the room are notified and they
+room. EOS picks Bob as the new master client. The remaining members of the room are notified and they
 reestablish their UE4 connections.
 
-<div style="text-align: center; padding: 10pt;"><img src="./Media/photon_to_ue4_2.png" align="middle" width="650"></div>
+<div style="text-align: center; padding: 10pt;"><img src="./Media/eos_to_ue4_2.png" align="middle" width="650"></div>
 
-We end up with two Photon rooms, the Purple room is now hosted by Bob, with Charlie and Donna connected to him.
+We end up with two EOS rooms, the Purple room is now hosted by Bob, with Charlie and Donna connected to him.
 Alice just left the room through the door to her lobby, but since she is the only one there, she becomes both
 the master client and host of her group lobby.
 
@@ -224,7 +224,7 @@ but on the other hand he still retains his own lobby session id.  He is still pa
 	<img src="./Media/screenshots/5c.jpg" width="250">
 </div>
 
-When Bob leaves the blue room, Photon notifies Alice and Charlie that the master client has changed.
+When Bob leaves the blue room, EOS notifies Alice and Charlie that the master client has changed.
 A host migration is needed: Alice opens a new UE4 listen-server, since she is the new master client
 of the blue room, and Charlie connects to her.
 
@@ -266,13 +266,12 @@ Charlie’s lobby session id is updated and the three of them will now share the
 
 # C. <a id="C">SharedSpaces Implementation</a>
 
-SharedSpaces uses the Oculus Platform and the Photon SDK.  For each of these we have created a
+SharedSpaces uses the Oculus Platform and Unreal EOS plugin.  For each of these we have created a
 [game instance subsystem](https://docs.unrealengine.com/4.27/en-US/ProgrammingAndScripting/Subsystems/)
 deployed in its own separate plugin.  This makes them easy to reuse in your own projects.
 
 The plugins have their own documentation available here that you can access for details:
 - [Oculus Platform](../Plugins/OculusPlatform/Documentation/OculusPlatform.md)
-- [Photon Net Driver](../Plugins/PhotonNetDriver/Documentation/PhotonNetDriver.md)
 
 Let's dive into how these are used at the project level.
 
@@ -299,7 +298,7 @@ both major subsystems.
 
 + Oculus Platform Subsystem
 	+ On Login Complete: we need to wait to be fully logged in with Oculus before we identify ourself
-		with the Photon system, since we reuse the same identifiers.  Note that those identifiers are
+		with the EOS system, since we reuse the same identifiers.  Note that those identifiers are
 		unique per user and per application, so this is not revealing any personal information.
     + On Launch Intent Changed: this event is generated when the application is started.  We only
 		care about the case where the application was launched manually by the user (i.e. "normal" launch)
@@ -308,30 +307,30 @@ both major subsystems.
 		Oculus group presence launch intent.  These are all the cases where the application is asked
 		to join a specific destination with lobby and match identifiers, along with a deeplink message.
 		Typically it will generated when the user explicitly accepts an invitation to join someone in game.
-+ Photon Subsystem
-	+ On Master Server Disconnected: there are many situations that will cause a user to disconnect from
-		the Photon servers.  A typical one is when the headset is removed and goes dormant: we need to
-		immediately notify all users that share that room that this user is gone, especially when he is
-		the one hosting the UE4 server for the current shared space.
-	+ On Room Joined or Created: event received in response to joining a room, potentially creating it
-		first if it doesn't yet exist.  This triggers a UE4 client/server connection optionally with a
-		start position if we are rejoining the room.
-	+ On Master Client Changed: this is an important event for ensuring host migration.  The Photon
-		master client is responsible for hosting the UE4 server, so when he leaves the room, all
++ EOS Subsystem
+    + On Log Entry: Sets up the ability to log EOS information, warnings and errors.
+	+ On Login: Event for when the user attempts to login.
+        Need to be logged in to the EOS system before initialization continues.
+	+ On Room Created: Event for when the user attempts to create an EOS lobby. 
+    	This triggers a UE4 client/server connection.
+	+ On Room Found: Event for when searching for an EOS lobby is finished. If a lobby was found, the user will join it,
+    	else the user will create the lobby.
+	+ On Room Joined: Event for when the user attempts to join a lobby.This triggers a UE4 client/server connection.
+	+ On Master Client Changed: This is an important event for ensuring host migration.  The EOS
+		master client is responsible for hosting the UE4 server, so when they leave the room, all
 		remaining users are notified of that change so that they can reestablish connection: the new
-		master client starts a listen-server and the other users connect to him.
-	+ On Application Enters Foreground: most often this is caused by the user removing his headset and
-		putting it back on a bit later.  Here we rejoin the room that we were in.
-	+ On Leave Room: Photon requires you to be in only one room at a time.  We explicitly leave the
-		current room when we are about to join a new one.  This event leads us to join this new room.
-	+ On Master Server Connected: we mostly care about the case where we fail to reconnect, in which
-		case we wait a moment before trying again.
+		master client starts a listen-server and the other users connect to them.
+	+ On Room Destroyed: Event for when a user leaves a lobby. If the user is the only one in the lobby when leaving, it is destroyed.
+	+ On Player Joined: Event to notify the master client when a player joins the lobby.
+	+ On Player Left: Event to notify the master client when a player leaves the lobby.
+	+ On App Enters Foreground: Most often this is caused by the user removing their headset and
+		putting it back on a bit later.  Here we rejoin the lobby that we were in.
 
 These game instance subsystems benefit from the same lifecycle guarantees as the game instance: they
 are singletons that live as long as the application.  The only issue that we need to be careful of
 is the timing dependencies between the subsystems and the game instance itself.  There are many ways
-to control the ordering of actions and here we have opted for the Oculus Platform Subsystem to notify
-the game instance by calling OculusPlatformSubsystemStarted event.  No prior bindings are required
+to control the ordering of actions and here we have opted for the Oculus Platform Subsystem and EOS subsystem to notify
+the game instance by calling OculusPlatformSubsystemStarted and EOSInitializated event.  No prior bindings are required
 as this is called by name in code.
 
 ### 1b. Social Networking: Setting your Group Presence
@@ -375,7 +374,7 @@ Let's review the information required for connecting the players together:
 	shown earlier in this document, you share your lobby id by inviting others to join you
 	in the Lobby destination.  If they accept the invitation to lobby, they join your team.
 
-	When at the Lobby destination, you join the Photon room named after your lobby id.
+	When at the Lobby destination, you join the EOS room named after your lobby id.
 
 + __Match Id__: the other identifier linked to your group presence is the *match session id*.
 	You can think of it as the unique identifier of your current destination when you are not
@@ -390,7 +389,7 @@ Let's review the information required for connecting the players together:
 	balancing, taking your lobby session id into consideration to try to keep your team
 	together.  We have plans on expanding in that direction in a future version of the showcase.
 
-	When at a colored room destination, you join the Photon room named after your match id.
+	When at a colored room destination, you join the EOS room named after your match id.
 
 <div style="text-align: center; padding: 10pt;">
 	<img src="./Media/query_destination.png" width="1000">
@@ -423,46 +422,49 @@ the match id passed to *Network Launch* as his presence lobby id.
 Finally, in the case of a public match, we override the match id with that room's
 public name, as discussed earlier.
 
-### 1c. Transport Layer: Joining or Rejoining a Photon Room
+### 1c. Transport Layer: Joining or Rejoining a EOS Lobby
 
 <div style="text-align: center; padding: 10pt;">
-	<img src="./Media/room_name.png" width="600">
+	<img src="./Media/FindSession.png" width="600">
 </div>
 
-The name of the Photon room that we join is trivially based on the user's group presence
+The name of the EOS Lobby that we join is trivially based on the user's group presence
 set in the previous section: we use the match id if we have one, and the lobby id otherwise.
 
-After ensuring that we have a connection to the Photon Master Server, we also ensure that
-we are not currently in a different Photon room.  If we are, we first call the *Leave*
-blueprint node and during the callback we call *Photon Join or Create Room* again.
+We find the lobby using *Find Session*.
 
 <div style="text-align: center; padding: 10pt;">
-	<img src="./Media/join_or_create_room.png" width="600">
+	<img src="./Media/FindSessionDelegate.png" width="600">
 </div>
 
-When all this is done, we call the *Join or Create Room* blueprint node on our Photon subsystem.
-If the room exists, we join it as a normal client, otherwise we create it and become its initial
-master client.
+When *Find Session* is done, a callback is called and if they lobby was found, the user will
+attempt to join it by calling *Join Session*, otherwise the lobby is created by calling
+*Create Session* and the user becomes the initial master client.
+
 
 
 <div style="text-align: center; padding: 10pt;">
-	<img src="./Media/application_enter_foreground.png" width="600">
+	<img src="./Media/OnAppEntersForeground.png" width="600">
 </div>
 
-There are a few situations that require us to rejoin the current Photon room: when we lose
-connection to the Photon Master Server, which should be rare, and when our application goes back
+There are a few situations that require us to rejoin the current EOS room: when we lose
+connection to the EOS lobby, which should be rare, and when our application goes back
 to foreground, which is much more frequent.  You can find how we handle those events in the
-Photon initialization region of the blueprint.
+EOS setup region of the blueprint.
 
 ### 1d. Application Replication: Establishing UE4 Client-Server Connections
 
 
 <div style="text-align: center; padding: 10pt;">
-	<img src="./Media/join_or_create_handler.png" width="1200">
+	<img src="./Media/LobbyCreation.png" width="1200">
 </div>
 
-UE4 network connections are mainly established after joining (or rejoining) a Photon room.
-The key information that we need is our Photon room master client status, the host address
+<div style="text-align: center; padding: 10pt;">
+	<img src="./Media/JoinLobby.png" width="1200">
+</div>
+
+UE4 network connections are mainly established after joining (or rejoining) an EOS lobby.
+The key information that we need is our EOS room master client status, the host address
 associated with the current master client of the space that we are connecting to, and an 
 optional start location.
 
@@ -484,7 +486,7 @@ we need to host the level or join an existing server.
 +  __Master Client__: open &lt;level&gt; # &lt;startpos&gt; ? listen
 +  __Normal Client__:  open &lt;address&gt; # &lt;startpos&gt;
 
-The Photon room master client opens up a level by name and uses the "?listen" parameter to
+The EOS room master client opens up a level by name and uses the "?listen" parameter to
 indicate that we will also accept client connections.  This is known as the __listen-server__ 
 mode.  Everybody else simply opens a connection to that server using the address provided.
 In the case of SharedSpaces, that address is the application-specific user id of the host
@@ -787,6 +789,38 @@ public room (the purple room).  Here are the settings for each of them.
 In addition to these settings, you need to set __Deeplink Type__ to __Enabled__ and add an image for your
 destination.  In the case of SharedSpaces, the destination is __Audience__ is set to __Everyone__. Also make sure to set the max group launch capacity for each destination so that the group launch feature can be used.
 
+Next, you need to upload a build to a release channel.
+To do this Go to [Unreal Sign Project for Release](https://dev.epicgames.com/documentation/en-us/unreal-engine/signing-android-projects-for-release-on-the-google-play-store-with-unreal-engine)
+and follow the instructions.
+
+<div style="text-align: center; padding: 10pt;">
+	<img src="./Media/Developerhub.png"  width="800">
+</div>
+
+After that, package your project, open the Meta Developer Hub app,
+go to App Distrbution and find your created app. 
+Choose one of the the Release Channels and press Upload.
+
+Once your build is uploaded you will see it on the
+Oculus Developer Dashboard website under Distribution -> Release Channels.
+
+Once all of the tests pass, go to Distribution -> Release Channels
+then click on the release channel you uploaded your build to.
+Go to Users then click Email Invite Users. Invite all the users that you to access the app.
+
+You must use emails that
+are assoicated with quest devices for the devices to be able to download the app
+and pass the entitlement check. If they aren't invited the oculus platform
+will not work correctly.
+
+If everything was done correctly, you should see the app in your app library on your quest device
+and have the ability to download and install it.
+Once this is all finished you can upload a development or shipping build to your device directly
+and the entitlement check will always pass.
+
+Everytime you upload a new build you need to delete the app data on your Quest device before launching the app.
+This is done by going to the Settings -> Storage, find your app and then Delete App Data.
+
 ## 3. <a id="D3">Data Use Checkup</a>
 
 You will need to request access to platform data needed by SharedSpaces. Under __Data Use Checkup__, add the following items and submit for certification.
@@ -797,8 +831,8 @@ You will need to request access to platform data needed by SharedSpaces. Under _
 +  Friends
 +  Invites
 
-## 4. <a id="D4">Photon Configuration</a>
+## 4. <a id="D4">EOS Configuration</a>
 
-You will also need to create a Photon AppID and configure the app to use it. Find instructions for this [here](../Plugins/PhotonNetDriver/Documentation/PhotonNetDriver.md#photon-appid).
+You will also need to configure EOS. Find instructions for this [here](EOSConfiguration.md).
 
 <div style="text-align: right; padding: 10pt;">&#x25A0;</div>

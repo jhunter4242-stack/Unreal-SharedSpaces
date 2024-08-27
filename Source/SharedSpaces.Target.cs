@@ -10,8 +10,10 @@ public class SharedSpacesTarget : TargetRules
 	public SharedSpacesTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V4;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_3;
+		bUseLoggingInShipping = true;
+		BuildEnvironment = TargetBuildEnvironment.Unique;
+		DefaultBuildSettings = BuildSettingsVersion.V5;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_4;
 		ExtraModuleNames.Add("SharedSpaces");
 	}
 }

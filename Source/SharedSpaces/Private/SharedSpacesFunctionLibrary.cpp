@@ -18,6 +18,66 @@ namespace SSFL
 	const FString RoomIdKey(TEXT("room"));
 }
 
+FString USharedSpacesFunctionLibrary::AddQuotationMarks(const FString& DeepLink)
+{
+	constexpr TCHAR QuotationMark = '"';
+
+	int32 Index = -1;
+	FString Result;
+
+	if (DeepLink.FindChar(QuotationMark, Index))
+	{
+		Result = DeepLink;
+	}
+	else
+	{
+		FString Left;
+		FString Right;
+		if (DeepLink.Contains(TEXT("Lobby")) || DeepLink.Contains(TEXT("PurpleRoom")))
+		{
+			DeepLink.Split(TEXT(","), &Left, &Right);
+
+			FString Left2;
+			FString Right2;
+
+			Left.Split(TEXT(":"), &Left2, &Right2);
+			Left2.InsertAt(1, QuotationMark);
+			Left2.AppendChar(QuotationMark);
+			Right2.InsertAt(0, QuotationMark);
+			Right2.AppendChar(QuotationMark);
+			Result.Append(Left2);
+			Result.Append(":");
+			Result.Append(Right2);
+
+			Right.Split(TEXT(":"), &Left2, &Right2);
+			Left2.InsertAt(0, QuotationMark);
+			Left2.AppendChar(QuotationMark);
+			Right2.InsertAt(0, QuotationMark);
+			Right2.InsertAt(Right2.Len() - 1, QuotationMark);
+			Result.Append(",");
+			Result.Append(Left2);
+			Result.Append(":");
+			Result.Append(Right2);
+		}
+		else
+		{
+			DeepLink.Split(TEXT(":"), &Left, &Right);
+
+			Left.InsertAt(1, QuotationMark);
+			Left.AppendChar(QuotationMark);
+
+			Right.InsertAt(0, QuotationMark);
+			Right.InsertAt(Right.Len() - 1, QuotationMark);
+
+			Result.Append(Left);
+			Result.Append(":");
+			Result.Append(Right);
+		}
+	}
+
+	return Result;
+}
+
 void USharedSpacesFunctionLibrary::GetIsLobby(const FString& DeepLink, bool& bIsLobby)
 {
 	TSharedPtr<FJsonObject> DeepLinkJson = MakeShareable(new FJsonObject());

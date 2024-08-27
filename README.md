@@ -2,7 +2,13 @@
 
 [![Shared Spaces video](http://img.youtube.com/vi/td8dQxZY9OI/maxresdefault.jpg)](http://www.youtube.com/watch?v=td8dQxZY9OI "Shared Spaces | Oculus Multiplayer Sample")
 
-SharedSpaces was built by the VR Developer Tools team to demonstrate how you can quickly get people together in VR using the Oculus Social Platform APIs. This version was built for the Unreal Engine using the Photon SDK as the transport layer. Check out this [YouTube video](http://www.youtube.com/watch?v=td8dQxZY9OI "Shared Spaces | Oculus Multiplayer Sample") showing the demo.
+SharedSpaces was built by the VR Developer Tools team to demonstrate how you can quickly get people together in VR using the Oculus Social Platform APIs. This version was built for the Unreal Engine using the Unreal EOS plugin as the transport layer. Check out this [YouTube video](http://www.youtube.com/watch?v=td8dQxZY9OI "Shared Spaces | Oculus Multiplayer Sample") showing the demo.
+
+**NOTE:** The EOS version of Shared Spaces can only be used with the Meta Quest fork of Unreal Engine. See <a href="#build-instructions">Build Instructions</a> for more information.
+
+## 23 August 2024 Update - Shared Spaces EOS!
+
+We have created a new branch `eos-5.x` which contains a [new version of Shared Spaces using Epic Online Services](https://github.com/oculus-samples/Unreal-SharedSpaces/tree/eos-5.x) as its network layer (instead of Photon). This version also includes updates to support the latest [Meta fork of Unreal Engine](https://github.com/Oculus-VR/UnrealEngine)  `5.4.3-v68`.
 
 ## 06 December 2023 Update
 
@@ -56,13 +62,13 @@ To [visualize](./Documentation/Media/markdown_extension.png) markdown files in V
 
 1. [SharedSpaces project](./Documentation/SharedSpaces.md "SharedSpaces documentation")
 2. [OVRPlatform plugin](./Documentation/SharedSpaces.md#D)
-3. [Photon plugin](./Plugins/PhotonNetDriver/Documentation/PhotonNetDriver.md)
+3. [EOS configuration](./Documentation/EOSConfiguration.md)
 
 Details on how to setup the project can be found under [Oculus Application Configuration](./Documentation/SharedSpaces.md#d-oculus-application-configuration).
 
 ## Build Instructions
 
-1. Git LFS is required to access the assets of the project, such as blueprints and materials.  Make sure that you have Git LFS installed using the following command.
+1. Git LFS is required to access the assets of the project, such as bl[Shared Spaces](Documentation/SharedSpaces.md)ueprints and materials.  Make sure that you have Git LFS installed using the following command.
 ```sh
 git lfs install
 ```
@@ -70,8 +76,8 @@ git lfs install
 ```sh
 git clone https://github.com/oculus-samples/Unreal-SharedSpaces.git
 ```
-3. This project requires the Oculus fork of the UE5.3 game engine that you can find [here](https://github.com/Oculus-VR/UnrealEngine/tree/oculus-5.3).<br/>*NOTE:* access to the Oculus fork requires [access to Epic's GitHub](https://www.unrealengine.com/en-US/ue-on-github).
-4. You need [Visual Studio](https://docs.unrealengine.com/5.3/en-US/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine/) installed to build the engine and the project plugins.
+3. This project requires the Oculus fork of the UE5.4 game engine that you can find [here](https://github.com/Oculus-VR/UnrealEngine/tree/oculus-5.4).<br/>*NOTE:* access to the Oculus fork requires [access to Epic's GitHub](https://www.unrealengine.com/en-US/ue-on-github).
+4. You need [Visual Studio](https://docs.unrealengine.com/5.4/en-US/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine/) installed to build the engine and the project plugins.
 5. Open a command prompt, change directory to your Unreal root (see step 3), then run this command:
 ```sh
 .\GenerateProjectFiles.bat -Game SharedSpaces -Engine <full path to Unreal-SharedSpaces directory>\SharedSpaces.uproject
@@ -85,6 +91,5 @@ git clone https://github.com/oculus-samples/Unreal-SharedSpaces.git
 Unreal-SharedSpaces is under the license found [here](LICENSE).<br/>
 The Oculus License applies to the SDK and supporting material.<br/>
 The MIT license applies to only certain, clearly marked documents. If an individual file does not indicate which license it is subject to, then the Oculus License applies.<br/>
-We distribute the Photon SDK under agreement with Photon.  You will find their license [here](./Source/ThirdParty/Photon/license.txt).
 
 <div style="text-align: right; padding: 10pt;">&#x25A0;</div>

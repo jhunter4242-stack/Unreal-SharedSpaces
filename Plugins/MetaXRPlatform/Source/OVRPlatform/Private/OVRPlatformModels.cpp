@@ -263,11 +263,13 @@ FOvrAppDownloadResult::FOvrAppDownloadResult(ovrAppDownloadResultHandle OvrHandl
 
 void FOvrAppDownloadResult::Clear()
 {
+    AppInstallResult = EOvrAppInstallResult::Unknown;
     Timestamp = 0;
 }
 
 void FOvrAppDownloadResult::Update(ovrAppDownloadResultHandle OvrHandle, TOvrMessageHandlePtr MessageHandlePtr)
 {
+    AppInstallResult = ConvertAppInstallResult(ovr_AppDownloadResult_GetAppInstallResult(OvrHandle));
     Timestamp = static_cast<int64>(ovr_AppDownloadResult_GetTimestamp(OvrHandle));
 }
 
@@ -507,6 +509,124 @@ int64 UOvrBlockedUserPagesMethods::BlockedUserPages_GetSize(const FOvrBlockedUse
 bool UOvrBlockedUserPagesMethods::BlockedUserPages_HasNextPage(const FOvrBlockedUserPages& Model)
 {
     return ovr_BlockedUserArray_HasNextPage(Model.PagedArrayHandle);
+}
+
+// -----------------------------------------------------------------------------
+// FOvrCowatchViewer
+
+FOvrCowatchViewer::FOvrCowatchViewer()
+{
+    Clear();
+}
+
+FOvrCowatchViewer::FOvrCowatchViewer(ovrCowatchViewerHandle OvrHandle, TOvrMessageHandlePtr MessageHandlePtr)
+{
+    Update(OvrHandle, MessageHandlePtr);
+}
+
+void FOvrCowatchViewer::Clear()
+{
+    Data = TEXT("");
+    Id = 0;
+}
+
+void FOvrCowatchViewer::Update(ovrCowatchViewerHandle OvrHandle, TOvrMessageHandlePtr MessageHandlePtr)
+{
+    Data = UTF8_TO_TCHAR(ovr_CowatchViewer_GetData(OvrHandle));
+    Id = static_cast<FOvrId>(ovr_CowatchViewer_GetId(OvrHandle));
+}
+
+// -----------------------------------------------------------------------------
+// FOvrCowatchViewerPages
+
+FOvrCowatchViewerPages::FOvrCowatchViewerPages()
+{
+    Clear();
+}
+
+FOvrCowatchViewerPages::FOvrCowatchViewerPages(ovrCowatchViewerArrayHandle Handle, TOvrMessageHandlePtr MessageHandlePtr)
+{
+    Update(Handle, MessageHandlePtr);
+}
+
+void FOvrCowatchViewerPages::Clear()
+{
+    PagedArrayHandle = nullptr;
+    PagedArrayMessageHandlePtr.reset();
+}
+
+void FOvrCowatchViewerPages::Update(ovrCowatchViewerArrayHandle Handle, TOvrMessageHandlePtr MessageHandlePtr)
+{
+    PagedArrayHandle = Handle;
+    PagedArrayMessageHandlePtr = MessageHandlePtr;
+}
+
+FOvrCowatchViewer UOvrCowatchViewerPagesMethods::CowatchViewerPages_GetElement(const FOvrCowatchViewerPages& Model, int64 Index)
+{
+    return FOvrCowatchViewer(ovr_CowatchViewerArray_GetElement(Model.PagedArrayHandle, static_cast<size_t>(Index)), Model.PagedArrayMessageHandlePtr);
+}
+
+FString UOvrCowatchViewerPagesMethods::CowatchViewerPages_GetNextUrl(const FOvrCowatchViewerPages& Model)
+{
+    return UTF8_TO_TCHAR(ovr_CowatchViewerArray_GetNextUrl(Model.PagedArrayHandle));
+}
+
+int64 UOvrCowatchViewerPagesMethods::CowatchViewerPages_GetSize(const FOvrCowatchViewerPages& Model)
+{
+    return static_cast<int64>(ovr_CowatchViewerArray_GetSize(Model.PagedArrayHandle));
+}
+
+bool UOvrCowatchViewerPagesMethods::CowatchViewerPages_HasNextPage(const FOvrCowatchViewerPages& Model)
+{
+    return ovr_CowatchViewerArray_HasNextPage(Model.PagedArrayHandle);
+}
+
+// -----------------------------------------------------------------------------
+// FOvrCowatchViewerUpdate
+
+FOvrCowatchViewerUpdate::FOvrCowatchViewerUpdate()
+{
+    Clear();
+}
+
+FOvrCowatchViewerUpdate::FOvrCowatchViewerUpdate(ovrCowatchViewerUpdateHandle OvrHandle, TOvrMessageHandlePtr MessageHandlePtr)
+{
+    Update(OvrHandle, MessageHandlePtr);
+}
+
+void FOvrCowatchViewerUpdate::Clear()
+{
+    DataList.Clear();
+    Id = 0;
+}
+
+void FOvrCowatchViewerUpdate::Update(ovrCowatchViewerUpdateHandle OvrHandle, TOvrMessageHandlePtr MessageHandlePtr)
+{
+    DataList.Update(ovr_CowatchViewerUpdate_GetDataList(OvrHandle), MessageHandlePtr);
+    Id = static_cast<FOvrId>(ovr_CowatchViewerUpdate_GetId(OvrHandle));
+}
+
+// -----------------------------------------------------------------------------
+// FOvrCowatchingState
+
+FOvrCowatchingState::FOvrCowatchingState()
+{
+    Clear();
+}
+
+FOvrCowatchingState::FOvrCowatchingState(ovrCowatchingStateHandle OvrHandle, TOvrMessageHandlePtr MessageHandlePtr)
+{
+    Update(OvrHandle, MessageHandlePtr);
+}
+
+void FOvrCowatchingState::Clear()
+{
+    InSession = false;
+}
+
+void FOvrCowatchingState::Update(ovrCowatchingStateHandle OvrHandle, TOvrMessageHandlePtr MessageHandlePtr)
+{
+    InSession = ovr_CowatchingState_GetInSession(OvrHandle);
 }
 
 // -----------------------------------------------------------------------------

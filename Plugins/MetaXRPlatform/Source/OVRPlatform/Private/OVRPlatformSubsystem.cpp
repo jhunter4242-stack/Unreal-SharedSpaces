@@ -25,10 +25,15 @@
 #include "Misc/OutputDeviceNull.h"
 #include "Misc/CommandLine.h"
 #include "OVRPlatform.h"
+#include "Runtime/Launch/Resources/Version.h"
+
+#include "Engine/GameInstance.h"
 
 #include <string>
 
 #define TICK_SUBSYSTEM true
+
+bool UOvrPlatformSubsystem::bFirstInstanceInit = true;
 
 void UOvrPlatformSubsystem::StartMessagePump()
 {
@@ -54,6 +59,38 @@ void UOvrPlatformSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     OnAssetFileDownloadUpdateHandle =
         GetNotifDelegate(ovrMessage_Notification_AssetFile_DownloadUpdate)
         .AddUObject(this, &UOvrPlatformSubsystem::HandleOnAssetFileDownloadUpdate);
+
+    OnCowatchingApiNotReadyHandle =
+        GetNotifDelegate(ovrMessage_Notification_Cowatching_ApiNotReady)
+        .AddUObject(this, &UOvrPlatformSubsystem::HandleOnCowatchingApiNotReady);
+
+    OnCowatchingApiReadyHandle =
+        GetNotifDelegate(ovrMessage_Notification_Cowatching_ApiReady)
+        .AddUObject(this, &UOvrPlatformSubsystem::HandleOnCowatchingApiReady);
+
+    OnCowatchingInSessionChangedHandle =
+        GetNotifDelegate(ovrMessage_Notification_Cowatching_InSessionChanged)
+        .AddUObject(this, &UOvrPlatformSubsystem::HandleOnCowatchingInSessionChanged);
+
+    OnCowatchingInitializedHandle =
+        GetNotifDelegate(ovrMessage_Notification_Cowatching_Initialized)
+        .AddUObject(this, &UOvrPlatformSubsystem::HandleOnCowatchingInitialized);
+
+    OnCowatchingPresenterDataChangedHandle =
+        GetNotifDelegate(ovrMessage_Notification_Cowatching_PresenterDataChanged)
+        .AddUObject(this, &UOvrPlatformSubsystem::HandleOnCowatchingPresenterDataChanged);
+
+    OnCowatchingSessionStartedHandle =
+        GetNotifDelegate(ovrMessage_Notification_Cowatching_SessionStarted)
+        .AddUObject(this, &UOvrPlatformSubsystem::HandleOnCowatchingSessionStarted);
+
+    OnCowatchingSessionStoppedHandle =
+        GetNotifDelegate(ovrMessage_Notification_Cowatching_SessionStopped)
+        .AddUObject(this, &UOvrPlatformSubsystem::HandleOnCowatchingSessionStopped);
+
+    OnCowatchingViewersDataChangedHandle =
+        GetNotifDelegate(ovrMessage_Notification_Cowatching_ViewersDataChanged)
+        .AddUObject(this, &UOvrPlatformSubsystem::HandleOnCowatchingViewersDataChanged);
 
     OnGroupPresenceInvitationsSentHandle =
         GetNotifDelegate(ovrMessage_Notification_GroupPresence_InvitationsSent)
@@ -120,10 +157,21 @@ void UOvrPlatformSubsystem::Deinitialize()
 {
     UE_LOG(LogOvrPlatform, Display, TEXT("UOvrPlatformSubsystem::Deinitialize"));
 
+    // Reset first instance init condition
+    bFirstInstanceInit = true;
+
     // Detaching message handlers
     GetNotifDelegate(ovrMessage_Notification_AbuseReport_ReportButtonPressed).RemoveAll(this);
     GetNotifDelegate(ovrMessage_Notification_ApplicationLifecycle_LaunchIntentChanged).RemoveAll(this);
     GetNotifDelegate(ovrMessage_Notification_AssetFile_DownloadUpdate).RemoveAll(this);
+    GetNotifDelegate(ovrMessage_Notification_Cowatching_ApiNotReady).RemoveAll(this);
+    GetNotifDelegate(ovrMessage_Notification_Cowatching_ApiReady).RemoveAll(this);
+    GetNotifDelegate(ovrMessage_Notification_Cowatching_InSessionChanged).RemoveAll(this);
+    GetNotifDelegate(ovrMessage_Notification_Cowatching_Initialized).RemoveAll(this);
+    GetNotifDelegate(ovrMessage_Notification_Cowatching_PresenterDataChanged).RemoveAll(this);
+    GetNotifDelegate(ovrMessage_Notification_Cowatching_SessionStarted).RemoveAll(this);
+    GetNotifDelegate(ovrMessage_Notification_Cowatching_SessionStopped).RemoveAll(this);
+    GetNotifDelegate(ovrMessage_Notification_Cowatching_ViewersDataChanged).RemoveAll(this);
     GetNotifDelegate(ovrMessage_Notification_GroupPresence_InvitationsSent).RemoveAll(this);
     GetNotifDelegate(ovrMessage_Notification_GroupPresence_JoinIntentReceived).RemoveAll(this);
     GetNotifDelegate(ovrMessage_Notification_GroupPresence_LeaveIntentReceived).RemoveAll(this);
@@ -152,6 +200,31 @@ void UOvrPlatformSubsystem::NotifyGameInstanceThatSubsystemStarted(bool bOculusP
 #if PLATFORM_WINDOWS
 bool UOvrPlatformSubsystem::InitWithWindowsPlatform()
 {
+#if ENGINE_MAJOR_VERSION == 5
+#if WITH_EDITOR
+    if (bFirstInstanceInit) {
+        // Raise warning when running multiplayer with "Run Under One Process" enabled
+        ULevelEditorPlaySettings* PlaySettings = GetMutableDefault<ULevelEditorPlaySettings>();
+        if (PlaySettings != nullptr)
+        {
+            int32 NumberOfClients = 0;
+            PlaySettings->GetPlayNumberOfClients(NumberOfClients);
+            bool bRunUnderOneProcess = false;
+            PlaySettings->GetRunUnderOneProcess(bRunUnderOneProcess);
+
+			if (NumberOfClients > 1 && bRunUnderOneProcess) {
+				FString InProcSupportMessage;
+				InProcSupportMessage += TEXT("Meta Platform SDK is not supported when 'Run Under One Process' is enabled in Multiplayer testing \n \n");
+				InProcSupportMessage += TEXT("Meta Platform SDK is not supported when 'Run Under One Process' is enabled in Multiplayer testing \n");
+				InProcSupportMessage += TEXT("All spawned players will use the same Platform user. Use multiprocess mode to enable multiple users \n");
+				InProcSupportMessage += TEXT("To change to multiprocess mode, go to Editor Preferences->Level Editor->Play, disable Run Under One Process \n ");
+				UE_LOG(LogOvrPlatform, Error, TEXT("%s"), *InProcSupportMessage);
+			}
+        }
+    }
+#endif
+#endif
+
     UE_LOG(LogOvrPlatform, Verbose, TEXT("UOvrPlatformSubsystem::InitWithWindowsPlatform()"));
 
     auto OculusAppId = GetAppId();
@@ -239,6 +312,10 @@ bool UOvrPlatformSubsystem::InitWithWindowsPlatform()
             return false;
         }
 #endif
+    }
+
+    if (bFirstInstanceInit) {
+        bFirstInstanceInit = false;
     }
 
     return true;
@@ -383,6 +460,128 @@ void UOvrPlatformSubsystem::HandleOnAssetFileDownloadUpdate(TOvrMessageHandlePtr
         ovrAssetFileDownloadUpdateHandle Handle = ovr_Message_GetAssetFileDownloadUpdate(*Message);
         FOvrAssetFileDownloadUpdate DownloadUpdate = FOvrAssetFileDownloadUpdate(Handle, Message);
         OnAssetFileDownloadUpdate.Broadcast(DownloadUpdate);
+    }
+}
+
+void UOvrPlatformSubsystem::HandleOnCowatchingApiNotReady(TOvrMessageHandlePtr Message, bool bIsError)
+{
+    if (bIsError)
+    {
+        ovrErrorHandle Error = ovr_Message_GetError(*Message);
+        FString ErrorMessage = ovr_Error_GetMessage(Error);
+        UE_LOG(LogOvrPlatform, Error, TEXT("Error in HandleOnCowatchingApiNotReady: %s"), *ErrorMessage);
+    }
+    else
+    {
+        FString ApiNotReady = UTF8_TO_TCHAR(ovr_Message_GetString(*Message));
+        OnCowatchingApiNotReady.Broadcast(ApiNotReady);
+    }
+}
+
+void UOvrPlatformSubsystem::HandleOnCowatchingApiReady(TOvrMessageHandlePtr Message, bool bIsError)
+{
+    if (bIsError)
+    {
+        ovrErrorHandle Error = ovr_Message_GetError(*Message);
+        FString ErrorMessage = ovr_Error_GetMessage(Error);
+        UE_LOG(LogOvrPlatform, Error, TEXT("Error in HandleOnCowatchingApiReady: %s"), *ErrorMessage);
+    }
+    else
+    {
+        FString ApiReady = UTF8_TO_TCHAR(ovr_Message_GetString(*Message));
+        OnCowatchingApiReady.Broadcast(ApiReady);
+    }
+}
+
+void UOvrPlatformSubsystem::HandleOnCowatchingInSessionChanged(TOvrMessageHandlePtr Message, bool bIsError)
+{
+    if (bIsError)
+    {
+        ovrErrorHandle Error = ovr_Message_GetError(*Message);
+        FString ErrorMessage = ovr_Error_GetMessage(Error);
+        UE_LOG(LogOvrPlatform, Error, TEXT("Error in HandleOnCowatchingInSessionChanged: %s"), *ErrorMessage);
+    }
+    else
+    {
+        ovrCowatchingStateHandle Handle = ovr_Message_GetCowatchingState(*Message);
+        FOvrCowatchingState InSessionChanged = FOvrCowatchingState(Handle, Message);
+        OnCowatchingInSessionChanged.Broadcast(InSessionChanged);
+    }
+}
+
+void UOvrPlatformSubsystem::HandleOnCowatchingInitialized(TOvrMessageHandlePtr Message, bool bIsError)
+{
+    if (bIsError)
+    {
+        ovrErrorHandle Error = ovr_Message_GetError(*Message);
+        FString ErrorMessage = ovr_Error_GetMessage(Error);
+        UE_LOG(LogOvrPlatform, Error, TEXT("Error in HandleOnCowatchingInitialized: %s"), *ErrorMessage);
+    }
+    else
+    {
+        FString Initialized = UTF8_TO_TCHAR(ovr_Message_GetString(*Message));
+        OnCowatchingInitialized.Broadcast(Initialized);
+    }
+}
+
+void UOvrPlatformSubsystem::HandleOnCowatchingPresenterDataChanged(TOvrMessageHandlePtr Message, bool bIsError)
+{
+    if (bIsError)
+    {
+        ovrErrorHandle Error = ovr_Message_GetError(*Message);
+        FString ErrorMessage = ovr_Error_GetMessage(Error);
+        UE_LOG(LogOvrPlatform, Error, TEXT("Error in HandleOnCowatchingPresenterDataChanged: %s"), *ErrorMessage);
+    }
+    else
+    {
+        FString PresenterDataChanged = UTF8_TO_TCHAR(ovr_Message_GetString(*Message));
+        OnCowatchingPresenterDataChanged.Broadcast(PresenterDataChanged);
+    }
+}
+
+void UOvrPlatformSubsystem::HandleOnCowatchingSessionStarted(TOvrMessageHandlePtr Message, bool bIsError)
+{
+    if (bIsError)
+    {
+        ovrErrorHandle Error = ovr_Message_GetError(*Message);
+        FString ErrorMessage = ovr_Error_GetMessage(Error);
+        UE_LOG(LogOvrPlatform, Error, TEXT("Error in HandleOnCowatchingSessionStarted: %s"), *ErrorMessage);
+    }
+    else
+    {
+        FString SessionStarted = UTF8_TO_TCHAR(ovr_Message_GetString(*Message));
+        OnCowatchingSessionStarted.Broadcast(SessionStarted);
+    }
+}
+
+void UOvrPlatformSubsystem::HandleOnCowatchingSessionStopped(TOvrMessageHandlePtr Message, bool bIsError)
+{
+    if (bIsError)
+    {
+        ovrErrorHandle Error = ovr_Message_GetError(*Message);
+        FString ErrorMessage = ovr_Error_GetMessage(Error);
+        UE_LOG(LogOvrPlatform, Error, TEXT("Error in HandleOnCowatchingSessionStopped: %s"), *ErrorMessage);
+    }
+    else
+    {
+        FString SessionStopped = UTF8_TO_TCHAR(ovr_Message_GetString(*Message));
+        OnCowatchingSessionStopped.Broadcast(SessionStopped);
+    }
+}
+
+void UOvrPlatformSubsystem::HandleOnCowatchingViewersDataChanged(TOvrMessageHandlePtr Message, bool bIsError)
+{
+    if (bIsError)
+    {
+        ovrErrorHandle Error = ovr_Message_GetError(*Message);
+        FString ErrorMessage = ovr_Error_GetMessage(Error);
+        UE_LOG(LogOvrPlatform, Error, TEXT("Error in HandleOnCowatchingViewersDataChanged: %s"), *ErrorMessage);
+    }
+    else
+    {
+        ovrCowatchViewerUpdateHandle Handle = ovr_Message_GetCowatchViewerUpdate(*Message);
+        FOvrCowatchViewerUpdate ViewersDataChanged = FOvrCowatchViewerUpdate(Handle, Message);
+        OnCowatchingViewersDataChanged.Broadcast(ViewersDataChanged);
     }
 }
 
