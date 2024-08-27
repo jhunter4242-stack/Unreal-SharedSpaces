@@ -4,6 +4,10 @@
 
 SharedSpaces was built by the VR Developer Tools team to demonstrate how you can quickly get people together in VR using the Oculus Social Platform APIs. This version was built for the Unreal Engine using the Photon SDK as the transport layer. Check out this [YouTube video](http://www.youtube.com/watch?v=td8dQxZY9OI "Shared Spaces | Oculus Multiplayer Sample") showing the demo.
 
+## 26 August 2024 Update - Shared Spaces EOS!
+
+We have created a new branch `eos-5.x` which contains a [new version of Shared Spaces using Epic Online Services](https://github.com/oculus-samples/Unreal-SharedSpaces/tree/eos-5.x) as its network layer (instead of Photon). This version also includes updates to support the latest [Meta fork of Unreal Engine](https://github.com/Oculus-VR/UnrealEngine)  `5.4.3-v68`.
+
 ## 06 December 2023 Update
 
 We updated the project to UE5.3.
