@@ -68,7 +68,7 @@ Details on how to setup the project can be found under [Oculus Application Confi
 
 ## Build Instructions
 
-1. Git LFS is required to access the assets of the project, such as bl[Shared Spaces](Documentation/SharedSpaces.md)ueprints and materials.  Make sure that you have Git LFS installed using the following command.
+1. Git LFS is required to access the assets of the project, such as blueprints and materials.  Make sure that you have Git LFS installed using the following command.
 ```sh
 git lfs install
 ```
